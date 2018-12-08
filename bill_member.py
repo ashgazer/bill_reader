@@ -9,14 +9,14 @@ import operator
 
 def bill_finder(data, bill_date, type):
 
-    bill_readings = []
+    bill_readings = {}
     for reading in data[type]:
         if parse(reading['readingDate']) <= bill_date:
-            bill_readings.append(reading)
+            bill_readings[reading['readingDate']] = reading['cumulative']
 
-    bill_readings = bill_readings[len(bill_readings)-2:]
+    sorted_keys = sorted(bill_readings.keys(), reverse=True)
 
-    kwh = bill_readings[1]['cumulative'] - bill_readings[0]['cumulative']
+    kwh = bill_readings[sorted_keys[0]] - bill_readings[sorted_keys[1]]
     SC = BULB_TARIFF[type]['standing_charge'] * float(bill_date.strftime('%d'))
     units = kwh * BULB_TARIFF[type]['unit_rate']
 
@@ -52,11 +52,11 @@ def calculate_bill(member_id, account_id, bill_date):
             if account_id in accounts:
                 for util_type in accounts[account_id]:
                     if 'electricity' in util_type:
-                        elect_charge = electricity(util_type, bill_date)
+                        elect_charge = bill_finder(util_type, bill_date, 'electricity')
                         charges = tuple(map(operator.add, charges, elect_charge))
 
                     if 'gas' in util_type:
-                        gas_charge = gas(util_type, bill_date)
+                        gas_charge = bill_finder(util_type, bill_date, 'gas')
                         charges = tuple(map(operator.add, charges, gas_charge))
 
 
