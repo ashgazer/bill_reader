@@ -6,37 +6,21 @@ import operator
 
 
 
-def electricity(data, bill_date):
 
-    elec_readings = []
-    for reading in data['electricity']:
+def bill_finder(data, bill_date, type):
+
+    bill_readings = []
+    for reading in data[type]:
         if parse(reading['readingDate']) <= bill_date:
-            elec_readings.append(reading)
+            bill_readings.append(reading)
 
-    elec_readings = elec_readings[len(elec_readings)-2:]
+    bill_readings = bill_readings[len(bill_readings)-2:]
 
-    kwh = elec_readings[1]['cumulative'] - elec_readings[0]['cumulative']
-    SC = BULB_TARIFF['electricity']['standing_charge'] * float(bill_date.strftime('%d'))
-    units = kwh * BULB_TARIFF['electricity']['unit_rate']
+    kwh = bill_readings[1]['cumulative'] - bill_readings[0]['cumulative']
+    SC = BULB_TARIFF[type]['standing_charge'] * float(bill_date.strftime('%d'))
+    units = kwh * BULB_TARIFF[type]['unit_rate']
 
     return (SC+units)/100, kwh
-
-
-def gas(data, bill_date):
-
-    elec_readings = []
-    for reading in data['gas']:
-        if parse(reading['readingDate']) <= bill_date:
-            elec_readings.append(reading)
-
-    elec_readings = elec_readings[len(elec_readings)-2:]
-
-    kwh = elec_readings[1]['cumulative'] - elec_readings[0]['cumulative']
-    SC = BULB_TARIFF['gas']['standing_charge'] * float(bill_date.strftime('%d'))
-    units = kwh * BULB_TARIFF['gas']['unit_rate']
-
-    return (SC+units)/100, kwh
-
 
 
 
@@ -55,11 +39,11 @@ def calculate_bill(member_id, account_id, bill_date):
             for account in accounts:
                 for util_type in accounts[account]:
                     if 'electricity' in util_type:
-                        elect_charge = electricity(util_type, bill_date)
+                        elect_charge = bill_finder(util_type, bill_date, 'electricity')
                         charges = tuple(map(operator.add, charges, elect_charge))
 
                     if 'gas' in util_type:
-                        gas_charge = gas(util_type, bill_date)
+                        gas_charge = bill_finder(util_type, bill_date, 'gas')
                         charges = tuple(map(operator.add, charges, gas_charge))
 
 
