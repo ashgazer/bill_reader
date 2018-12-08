@@ -18,19 +18,19 @@ def extract_days(bill_date):
     return int(diff.days)
 
 
-def bill_finder(data, bill_date, type):
+def bill_finder(data, bill_date, bill_type):
 
     bill_readings = {}
-    for reading in data[type]:
+    for reading in data[bill_type]:
         if parse(reading['readingDate']) <= bill_date:
             bill_readings[reading['readingDate']] = reading['cumulative']
 
     sorted_keys = sorted(bill_readings.keys(), reverse=True)
 
     kwh = bill_readings[sorted_keys[0]] - bill_readings[sorted_keys[1]]
-    SC = BULB_TARIFF[type]['standing_charge'] * float(extract_days(bill_date))
+    SC = BULB_TARIFF[bill_type]['standing_charge'] * float(extract_days(bill_date))
 
-    units = kwh * BULB_TARIFF[type]['unit_rate']
+    units = kwh * BULB_TARIFF[bill_type]['unit_rate']
 
     return (SC+units)/100, kwh
 
