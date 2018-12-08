@@ -7,6 +7,17 @@ import operator
 
 
 
+def extract_days(bill_date):
+
+    if bill_date.month == 1:
+        previous_date = 12
+    else:
+        previous_date = bill_date.month -1
+
+    diff = bill_date - bill_date.replace(month=previous_date)
+    return int(diff.days)
+
+
 def bill_finder(data, bill_date, type):
 
     bill_readings = {}
@@ -17,7 +28,8 @@ def bill_finder(data, bill_date, type):
     sorted_keys = sorted(bill_readings.keys(), reverse=True)
 
     kwh = bill_readings[sorted_keys[0]] - bill_readings[sorted_keys[1]]
-    SC = BULB_TARIFF[type]['standing_charge'] * float(bill_date.strftime('%d'))
+    SC = BULB_TARIFF[type]['standing_charge'] * float(extract_days(bill_date))
+
     units = kwh * BULB_TARIFF[type]['unit_rate']
 
     return (SC+units)/100, kwh
