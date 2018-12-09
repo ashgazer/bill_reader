@@ -5,14 +5,12 @@ from tariff import BULB_TARIFF
 import operator
 
 
-
-
 def extract_days(bill_date):
 
     if bill_date.month == 1:
         previous_date = 12
     else:
-        previous_date = bill_date.month -1
+        previous_date = bill_date.month - 1
 
     diff = bill_date - bill_date.replace(month=previous_date)
     return int(diff.days)
@@ -35,9 +33,20 @@ def bill_finder(data, bill_date, bill_type):
     return (SC+units)/100, kwh
 
 
-
-
 def calculate_bill(member_id, account_id, bill_date):
+    def charge_cal(util_name):
+        c = (0, 0)
+
+        if 'electricity' in util_name:
+            elect_charge = bill_finder(util_name, bill_date, 'electricity')
+            c = tuple(map(operator.add, charges, elect_charge))
+
+        if 'gas' in util_name:
+            gas_charge = bill_finder(util_name, bill_date, 'gas')
+            c = tuple(map(operator.add, charges, gas_charge))
+
+        return c
+
     utc = pytz.UTC
     readings = get_readings()
     readings = readings[member_id]
@@ -45,41 +54,18 @@ def calculate_bill(member_id, account_id, bill_date):
     bill_date = utc.localize(bill_date)
     charges = (0, 0)
 
-
     if account_id == 'ALL' or account_id is None:
         for accounts in readings:
             for account in accounts:
                 for util_type in accounts[account]:
-                    if 'electricity' in util_type:
-                        elect_charge = bill_finder(util_type, bill_date, 'electricity')
-                        charges = tuple(map(operator.add, charges, elect_charge))
-
-                    if 'gas' in util_type:
-                        gas_charge = bill_finder(util_type, bill_date, 'gas')
-                        charges = tuple(map(operator.add, charges, gas_charge))
-
-
+                    charges = tuple(map(operator.add, charges, charge_cal(util_type)))
     else:
         for accounts in readings:
             if account_id in accounts:
                 for util_type in accounts[account_id]:
-                    if 'electricity' in util_type:
-                        elect_charge = bill_finder(util_type, bill_date, 'electricity')
-                        charges = tuple(map(operator.add, charges, elect_charge))
-
-                    if 'gas' in util_type:
-                        gas_charge = bill_finder(util_type, bill_date, 'gas')
-                        charges = tuple(map(operator.add, charges, gas_charge))
-
+                    charges = tuple(map(operator.add, charges, charge_cal(util_type)))
 
     return float("{0:.2f}".format(charges[0])), charges[1]
-
-
-
-
-
-
-
 
 
 def calculate_and_print_bill(member_id, account, bill_date):
