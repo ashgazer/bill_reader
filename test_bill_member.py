@@ -25,7 +25,7 @@ class TestBillMember(unittest.TestCase):
         data = {'electricity': [{'cumulative': 18453, 'readingDate': '2017-07-31T00:00:00.000Z', 'unit': 'kWh'},
                 {'cumulative': 18620, 'readingDate': '2017-08-31T00:00:00.000Z', 'unit': 'kWh'}]}
 
-        amount, kwh = bill_finder(data, date_to_test, 'electricity')
+        amount, kwh = bill_finder(data, date_to_test)
 
         self.assertEqual(amount, 27.56843)
         self.assertEqual(kwh, 167)

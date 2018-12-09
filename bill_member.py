@@ -24,19 +24,25 @@ def extract_days(bill_date):
     return int(diff.days)
 
 
-def bill_finder(data, bill_date, bill_type):
+def bill_finder(data, bill_date):
     """
     bill finder will calculate for 'gas' and 'electric' utils
     the kwh estimate using the last two previous bills from the bill_date.
     and return kwh and the amount of charge for the last month based on kwh.
 
 
-     data :: List of bills from specific utility saved as dictionaries.
+     data (dict):: A dict of list of bills from specific utility saved as dictionaries.
      bill_date (datetime)  :: bill date period that has been entered.
-     bill_type (str) :: either the bill is 'gas' or 'electric'.
 
      return :: amount, kwh
     """
+
+    if 'electricity' in data:
+        bill_type = 'electricity'
+    elif 'gas' in data:
+        bill_type = 'gas'
+    else:
+        raise ValueError('bill type is not of gas or electricity')
 
     bill_readings = {}
     for reading in data[bill_type]:
@@ -64,22 +70,6 @@ def calculate_bill(member_id, account_id, bill_date):
 
     return (tuple) :: amount in £ and the estimated amount of utility used in kwh.
     """
-    def charge_cal(util_name):
-        """
-        util_name:: a dictionary of lists containing bills for a specific utility type.
-        returns (tuple) :: of amount charged and the estimated units used for specific bill.
-        """
-        c = (0, 0)
-
-        if 'electricity' in util_name:
-            elect_charge = bill_finder(util_name, bill_date, 'electricity')
-            c = tuple(map(operator.add, charges, elect_charge))
-
-        if 'gas' in util_name:
-            gas_charge = bill_finder(util_name, bill_date, 'gas')
-            c = tuple(map(operator.add, charges, gas_charge))
-
-        return c
 
     utc = pytz.UTC
     readings = get_readings()
@@ -92,12 +82,12 @@ def calculate_bill(member_id, account_id, bill_date):
         for accounts in readings:
             for account in accounts:
                 for util_type in accounts[account]:
-                    charges = tuple(map(operator.add, charges, charge_cal(util_type)))
+                    charges = tuple(map(operator.add, charges, bill_finder(util_type, bill_date)))
     else:
         for accounts in readings:
             if account_id in accounts:
                 for util_type in accounts[account_id]:
-                    charges = tuple(map(operator.add, charges, charge_cal(util_type)))
+                    charges = tuple(map(operator.add, charges, bill_finder(util_type, bill_date)))
 
     return float("{0:.2f}".format(charges[0])), charges[1]
 
