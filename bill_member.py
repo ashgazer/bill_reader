@@ -8,11 +8,11 @@ import operator
 def extract_days(bill_date):
     """
     Extract days will minus one month from the given date and return the
-    number of days
+    number of days.
 
-    bill_date (datetime) :: datetime object of the bill_date
+    bill_date (datetime) :: datetime object of the bill_date.
 
-    return (int) :: returns numbers of days as integer of 'bill_date - 1 month'
+    return (int) :: returns numbers of days as integer of 'bill_date - 1 month'.
     """
 
     if bill_date.month == 1:
@@ -28,12 +28,12 @@ def bill_finder(data, bill_date, bill_type):
     """
     bill finder will calculate for 'gas' and 'electric' utils
     the kwh estimate using the last two previous bills from the bill_date.
-    and return kwh and the amount of charge for the last month based on kwh
+    and return kwh and the amount of charge for the last month based on kwh.
 
 
-     data :: List of bills from specific utility saved as dictionaries
-     bill_date (datetime)  :: bill date period that has been entered
-     bill_type (str) :: either the bill is 'gas' or 'electric'
+     data :: List of bills from specific utility saved as dictionaries.
+     bill_date (datetime)  :: bill date period that has been entered.
+     bill_type (str) :: either the bill is 'gas' or 'electric'.
 
      return :: amount, kwh
     """
@@ -58,13 +58,17 @@ def calculate_bill(member_id, account_id, bill_date):
     calculate will take member_id information and return a tuple of amound charged and the estimated
     usage in kwh
 
-    member_id (str): membership number of bulb user
-    account_id (str): specific account_id of bulb user. can be Blank, All or specific
-    bill_date (str): the date the customer wishes to calculate their bill to
+    member_id (str): membership number of bulb user.
+    account_id (str): specific account_id of bulb user. can be Blank, All or specific.
+    bill_date (str): the date the customer wishes to calculate their bill to.
 
-    return (tuple) :: amount if £ and the estimated amount of utility used in kwh
+    return (tuple) :: amount in £ and the estimated amount of utility used in kwh.
     """
     def charge_cal(util_name):
+        """
+        util_name:: a dictionary of lists containing bills for a specific utility type.
+        returns (tuple) :: of amount charged and the estimated units used for specific bill.
+        """
         c = (0, 0)
 
         if 'electricity' in util_name:
